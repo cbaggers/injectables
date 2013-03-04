@@ -20,13 +20,18 @@
   (setf *injvars* (make-hash-table))
   t)
 
-(set-dispatch-macro-character #\# #\@ #'injector)
-(set-dispatch-macro-character #\# #\! #'injector)
+(set-dispatch-macro-character #\# #\@ 
+   (lambda (stream char1 char2)
+     (declare (ignorable char1 char2))
+     (let ((target (read stream nil (values) t)))
+       (if (symbolp target)
+           (list 'injectable (list 'quote target))
+           (error "Target must be a symbol")))))
 
-(defun injector (stream char1 char2)
-  (declare (ignorable char1 char2))
-  (let ((target (read stream t nil t)))
-    (if (symbolp target)
-        (append (list 'injectable (list 'quote target))
-                (when (equal char1 #\!) (list target)))
-        (error "Target must be a symbol"))))
+(set-dispatch-macro-character #\# #\^
+   (lambda (stream char1 char2)
+     (declare (ignorable char1 char2))
+     (let ((target (read stream nil (values) t)))
+       (if (symbolp target)
+           (list 'injectable (list 'quote target) target)
+           (error "Target must be a symbol")))))
