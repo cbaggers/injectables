@@ -26,7 +26,8 @@ Then the result will be the value of model from inside the function
 We can also setf the injected variable. This will set it's value until we flush the injected
 variable.
 
-**USE**
+USE
+---
 
     #^var-name will return the injected value if there is one or will use the value of var-name
     in that scope.
@@ -36,7 +37,8 @@ variable.
     Both of these can be *setf*'d
 
     
-**INJECTABLE VARIABLES ARE CONSIDERED HARMFUL**
+INJECTABLE VARIABLES ARE CONSIDERED HARMFUL
+-------------------------------------------
 
 I know I'm going a little overboard with the warnings here but seriously, these are not for use
 in production code. This is probably the wrong answer to the issue I have but for now it works
