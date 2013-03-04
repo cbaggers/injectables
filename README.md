@@ -23,8 +23,7 @@ and then from the repl write:
 
 Then the result will be the value of model from inside the function
 
-We can also setf the injected variable. This will set it's value until we flush the injected
-variable.
+We can also setf the injected variable, this will set it's value until we flush it.
 
 USE
 ---
@@ -35,6 +34,10 @@ USE
     #@var-name will return the injected value if there is one or will return nil.
 
     Both of these can be *setf*'d
+    
+    (flush 'var-name) will clear the injected value
+    
+    (flush-all) will clear all injected values
 
     
 INJECTABLE VARIABLES ARE CONSIDERED HARMFUL
