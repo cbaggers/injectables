@@ -8,8 +8,9 @@ a little more pleasent.
 
 Say you have the following function that is called every loop:
 
-    (defun render (model)
-      (opengl-draw model))
+    (let ((model (make-model)))
+      (defun render (position)
+        (opengl-draw model position)))
   
 If I want to access to the variable model I can change the code above to this:
 
