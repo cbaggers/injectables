@@ -25,6 +25,16 @@ Then the result will be the value of model from inside the function
 
 We can also setf the injected variable. This will set it's value until we flush the injected
 variable.
+
+**USE**
+
+#^var-name will return the injected value if there is one or will use the value of var-name
+in that scope.
+
+#@var-name will return the injected value if there is one or will return nil.
+
+Both of these can be *setf*'d
+
     
 **INJECTABLE VARIABLES ARE CONSIDERED HARMFUL**
 
