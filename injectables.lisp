@@ -30,52 +30,43 @@
                                                   (quote injectables))))
            (error "Target must be a symbol")))))
 
-
-(set-macro-character #\> (get-macro-character #\)))
-
+;;[TODO] I'm thinking that this should probably produce macros 
+;;       which fully exapnd to check the sanity of the form
+;;       for now this will do.
 (set-dispatch-macro-character #\# #\^
    (lambda (stream char1 char2)
      (declare (ignorable char1 char2))
      (let* ((peek (peek-char t stream nil nil nil))
             (func? (equal peek #\'))
             (peek (if func?
-                      (peek-char t stream nil nil nil)
+                      (progn (read-char stream nil nil nil)
+                             (peek-char t stream nil nil nil))
                       peek)))
-       (if (equal peek #\<)
+       (if (equal peek #\( )
            (progn (read-char stream nil nil nil)
-                  (let* ((target (read-delimited-list #\> stream t))
+                  (let* ((target (read-delimited-list #\) stream t))
                          (name (first target))
                          (value (second target)))
-                    `(injectable ',(intern (write-to-string name) 
-                                           'injectables)
-                                 ,value)))
-           (let ((target (read stream nil (values) t)))
-             (if (or (symbolp target)
-                     (when (consp target)
-                       (equal (car target) 'quote)))
-                 `(injectable ',(intern (write-to-string 
-                                         (if func?
-                                             (cadr target)
-                                             target)) 
-                                        'injectables)
-                              ,(if func?
-                                   `(function ,(cadr target))
-                                   `(quote ,target)))                     
-                 (error "Injectables overiding values must be given a name")))))))
-
-;; Working example - REMEMBER MACROEXPAND IN REPL CAN CRASH WITH EOF
-;; (set-dispatch-macro-character #\# #\<
-;;    (lambda (stream char1 char2)
-;;      (declare (ignorable char1 char2))
-;;      (let ((target (read-delimited-list #\> stream t)))
-;;        target)))
+                    (if (eql 2 (length target))
+                        `(injectable ',(intern (write-to-string name) 
+                                               'injectables)
+                                     ,(if func? `(function ,value) value))
+                        (error "Injectables overiding lambdas must be given a name"))))
+           (let* ((target (read stream nil (values) t))
+                  (target (if func? 
+                              (if (consp target) (cadr target) target) 
+                              target)))
+             (if (symbolp target)
+                 `(injectable ',(intern (write-to-string target) 'injectables)
+                              ,(if func? `(function ,target) target))
+                 (error "Injectables overiding values or lambdas must be given a name")))))))
 
 ;; #^a
-;; #^<a 1.0>
-;; #^<a '(1 2 3)>
+;; #^(a 1.0)
+;; #^(a '(1 2 3))
 
 ;; #^'+
-;; #^'<b (lambda (x) x)>
+;; #^'(b (lambda (x) x))
 
 ;; #@a
 ;; (setf #@a 2.0)
